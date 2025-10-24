@@ -11,4 +11,39 @@ yarn-error.log*
 # Dependency directories
 bower_components/
 
-# Production build folder (adjust if needed
+# Production build folder (adjust if needed)
+dist/
+
+# Vite specific
+.vite/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Optional npm cache folder
+.npm/
+
+# Optional eslint cache
+.eslintcache
+
+# IDE/editor folders
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Mac specific files
+*.DS_Store
+
+# Misc
+*.tgz
+
+# Temporary folders
+temp/
+tmp/
