@@ -392,6 +392,8 @@ export const selectCartError = (state) => state.cart.error;
 
 // Export aliases for components expecting different names
 export const updateQuantity = updateCartItem;
+export const updateCartQuantity = updateCartItem;
+export const applyDiscount = applyCoupon;
 
 // Export reducer
 export default cartSlice.reducer;

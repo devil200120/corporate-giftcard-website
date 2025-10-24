@@ -1,5 +1,5 @@
 import React from "react";
-import { LoaderIcon } from "lucide-react";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
 
 const Button = ({
   children,
@@ -45,7 +45,7 @@ const Button = ({
       className={`${baseClasses} ${variantClasses} ${sizeClasses} ${className}`}
       {...props}
     >
-      {loading && <LoaderIcon className="w-4 h-4 mr-2 animate-spin" />}
+      {loading && <ArrowPathIcon className="w-4 h-4 mr-2 animate-spin" />}
       {children}
     </button>
   );

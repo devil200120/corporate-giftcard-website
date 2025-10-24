@@ -451,5 +451,12 @@ export const selectEmployeesLoading = (state) => state.corporate.employeesLoadin
 export const selectCampaignsLoading = (state) => state.corporate.campaignsLoading;
 export const selectCorporateError = (state) => state.corporate.error;
 
+// Export aliases for components expecting different names
+export const fetchTeamMembers = fetchEmployeeList;
+export const inviteTeamMember = addEmployee;
+export const updateTeamMember = updateEmployee;
+export const removeTeamMember = removeEmployee;
+export const getCorporateAnalytics = fetchCorporateStats;
+
 // Export reducer
 export default corporateSlice.reducer;

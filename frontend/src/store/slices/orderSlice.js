@@ -316,6 +316,7 @@ export const {
 // Export aliases for components expecting different names
 export const fetchUserOrders = fetchOrders;
 export const placeOrder = createOrder;
+export const fetchOrderDetails = fetchOrderById;
 
 // Selectors
 export const selectOrders = (state) => state.orders.orders;

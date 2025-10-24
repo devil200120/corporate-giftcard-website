@@ -113,6 +113,20 @@ export const fetchRelatedProducts = createAsyncThunk(
   }
 );
 
+export const fetchProductReviews = createAsyncThunk(
+  'products/fetchProductReviews',
+  async (productId, { rejectWithValue }) => {
+    try {
+      const response = await productAPI.getProductReviews(productId);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to fetch product reviews'
+      );
+    }
+  }
+);
+
 export const addProductReview = createAsyncThunk(
   'products/addProductReview',
   async ({ productId, reviewData }, { rejectWithValue }) => {
@@ -283,6 +297,25 @@ const productSlice = createSlice({
         }
       })
 
+      // Fetch Product Reviews
+      .addCase(fetchProductReviews.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchProductReviews.fulfilled, (state, action) => {
+        state.isLoading = false;
+        if (state.currentProduct) {
+          state.currentProduct.reviews = action.payload.data.reviews;
+          state.currentProduct.rating = action.payload.data.rating;
+          state.currentProduct.numReviews = action.payload.data.numReviews;
+        }
+        state.error = null;
+      })
+      .addCase(fetchProductReviews.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+
       // Add Product Review
       .addCase(addProductReview.fulfilled, (state, action) => {
         if (state.currentProduct && state.currentProduct._id === action.payload.data.productId) {
@@ -335,6 +368,8 @@ export const selectProductPagination = (state) => state.products.pagination;
 export const selectProductsLoading = (state) => state.products.isLoading;
 export const selectSearchLoading = (state) => state.products.searchLoading;
 export const selectProductsError = (state) => state.products.error;
+export const selectProductReviews = (state) => state.products.currentProduct?.reviews || [];
+export const selectRelatedProducts = (state) => state.products.currentProduct?.relatedProducts || [];
 
 // Export reducer
 export default productSlice.reducer;
