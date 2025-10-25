@@ -57,11 +57,15 @@ const adminAPI = {
   },
 
   createProduct: (productData) => {
-    return api.post('/admin/products', productData);
+    return api.post('/admin/products', productData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
   },
 
   updateProduct: (productId, productData) => {
-    return api.put(`/admin/products/${productId}`, productData);
+    return api.put(`/admin/products/${productId}`, productData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
   },
 
   deleteProduct: (productId) => {

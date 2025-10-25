@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -24,10 +24,23 @@ const MobileMenu = ({ isOpen, onClose }) => {
   const { itemCount } = useSelector((state) => state.cart);
   const { items: wishlistItems } = useSelector((state) => state.wishlist);
 
+  const [isVisible, setIsVisible] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+
   useEffect(() => {
     if (isOpen) {
+      setIsVisible(true);
+      setIsAnimating(true);
       document.body.style.overflow = "hidden";
+      // Small delay to ensure the element is rendered before animation
+      setTimeout(() => setIsAnimating(false), 10);
     } else {
+      setIsAnimating(true);
+      // Wait for animation to complete before hiding
+      setTimeout(() => {
+        setIsVisible(false);
+        setIsAnimating(false);
+      }, 300);
       document.body.style.overflow = "unset";
     }
 
@@ -47,7 +60,7 @@ const MobileMenu = ({ isOpen, onClose }) => {
     onClose();
   };
 
-  if (!isOpen) return null;
+  if (!isVisible) return null;
 
   const categories = [
     { name: "Corporate Gifts", path: "/categories/corporate-gifts" },
@@ -59,17 +72,32 @@ const MobileMenu = ({ isOpen, onClose }) => {
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop with smooth fade animation */}
       <div
-        className="fixed inset-0 bg-gray-600 bg-opacity-50 z-40"
+        className={`fixed inset-0 bg-gray-600 z-40 transition-all duration-300 ease-in-out ${
+          isAnimating ? "bg-opacity-0" : "bg-opacity-50"
+        }`}
         onClick={onClose}
       />
 
-      {/* Menu Panel */}
-      <div className="fixed inset-y-0 left-0 w-full max-w-sm bg-white dark:bg-gray-800 shadow-xl z-50 transform transition-transform">
+      {/* Menu Panel with smooth slide animation */}
+      <div
+        className={`fixed inset-y-0 left-0 w-full max-w-sm bg-white dark:bg-gray-800 shadow-xl z-50 transform transition-all duration-300 ease-in-out ${
+          isAnimating
+            ? "-translate-x-full opacity-0"
+            : "translate-x-0 opacity-100"
+        }`}
+      >
         <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+          {/* Header with staggered animation */}
+          <div
+            className={`flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 transform transition-all duration-500 ease-out ${
+              isAnimating
+                ? "translate-y-4 opacity-0"
+                : "translate-y-0 opacity-100"
+            }`}
+            style={{ transitionDelay: isAnimating ? "0ms" : "100ms" }}
+          >
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-gradient-to-r from-primary-500 to-accent-500 rounded-lg"></div>
               <span className="text-xl font-bold text-gray-900 dark:text-white">
@@ -78,15 +106,22 @@ const MobileMenu = ({ isOpen, onClose }) => {
             </div>
             <button
               onClick={onClose}
-              className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-110"
             >
               <XMarkIcon className="w-6 h-6" />
             </button>
           </div>
 
-          {/* User Section */}
+          {/* User Section with staggered animation */}
           {isAuthenticated ? (
-            <div className="p-4 bg-gray-50 dark:bg-gray-700">
+            <div
+              className={`p-4 bg-gray-50 dark:bg-gray-700 transform transition-all duration-500 ease-out ${
+                isAnimating
+                  ? "translate-y-4 opacity-0"
+                  : "translate-y-0 opacity-100"
+              }`}
+              style={{ transitionDelay: isAnimating ? "0ms" : "150ms" }}
+            >
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center">
                   <span className="text-white font-medium text-sm">
@@ -104,17 +139,24 @@ const MobileMenu = ({ isOpen, onClose }) => {
               </div>
             </div>
           ) : (
-            <div className="p-4 bg-gray-50 dark:bg-gray-700">
+            <div
+              className={`p-4 bg-gray-50 dark:bg-gray-700 transform transition-all duration-500 ease-out ${
+                isAnimating
+                  ? "translate-y-4 opacity-0"
+                  : "translate-y-0 opacity-100"
+              }`}
+              style={{ transitionDelay: isAnimating ? "0ms" : "150ms" }}
+            >
               <div className="space-y-2">
                 <button
                   onClick={() => handleNavigation("/login")}
-                  className="w-full bg-primary-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-primary-700 transition-colors"
+                  className="w-full bg-primary-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-primary-700 transition-all duration-200 hover:scale-105 hover:shadow-lg"
                 >
                   Sign In
                 </button>
                 <button
                   onClick={() => handleNavigation("/register")}
-                  className="w-full border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                  className="w-full border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105"
                 >
                   Create Account
                 </button>
@@ -122,15 +164,34 @@ const MobileMenu = ({ isOpen, onClose }) => {
             </div>
           )}
 
-          {/* Navigation Content */}
-          <div className="flex-1 overflow-y-auto">
-            {/* Quick Actions */}
+          {/* Navigation Content with staggered animation */}
+          <div
+            className={`flex-1 overflow-y-auto transform transition-all duration-500 ease-out ${
+              isAnimating
+                ? "translate-y-4 opacity-0"
+                : "translate-y-0 opacity-100"
+            }`}
+            style={{ transitionDelay: isAnimating ? "0ms" : "200ms" }}
+          >
+            {/* Quick Actions with staggered animation */}
             {isAuthenticated && (
-              <div className="p-4 space-y-3">
+              <div
+                className={`p-4 space-y-3 transform transition-all duration-500 ease-out ${
+                  isAnimating
+                    ? "translate-y-4 opacity-0"
+                    : "translate-y-0 opacity-100"
+                }`}
+                style={{ transitionDelay: isAnimating ? "0ms" : "250ms" }}
+              >
                 <Link
                   to="/cart"
                   onClick={onClose}
-                  className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  className={`flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-105 hover:shadow-sm transform ease-out ${
+                    isAnimating
+                      ? "translate-y-2 opacity-0"
+                      : "translate-y-0 opacity-100"
+                  }`}
+                  style={{ transitionDelay: isAnimating ? "0ms" : "300ms" }}
                 >
                   <div className="flex items-center space-x-3">
                     <ShoppingBagIcon className="w-5 h-5 text-gray-400" />
@@ -151,7 +212,12 @@ const MobileMenu = ({ isOpen, onClose }) => {
                 <Link
                   to="/wishlist"
                   onClick={onClose}
-                  className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  className={`flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-105 hover:shadow-sm transform ease-out ${
+                    isAnimating
+                      ? "translate-y-2 opacity-0"
+                      : "translate-y-0 opacity-100"
+                  }`}
+                  style={{ transitionDelay: isAnimating ? "0ms" : "350ms" }}
                 >
                   <div className="flex items-center space-x-3">
                     <HeartIcon className="w-5 h-5 text-gray-400" />
@@ -172,7 +238,12 @@ const MobileMenu = ({ isOpen, onClose }) => {
                 <Link
                   to="/orders"
                   onClick={onClose}
-                  className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  className={`flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-105 hover:shadow-sm transform ease-out ${
+                    isAnimating
+                      ? "translate-y-2 opacity-0"
+                      : "translate-y-0 opacity-100"
+                  }`}
+                  style={{ transitionDelay: isAnimating ? "0ms" : "400ms" }}
                 >
                   <div className="flex items-center space-x-3">
                     <TruckIcon className="w-5 h-5 text-gray-400" />
@@ -185,19 +256,42 @@ const MobileMenu = ({ isOpen, onClose }) => {
               </div>
             )}
 
-            {/* Categories */}
-            <div className="border-t border-gray-200 dark:border-gray-700">
+            {/* Categories with staggered animation */}
+            <div
+              className={`border-t border-gray-200 dark:border-gray-700 transform transition-all duration-500 ease-out ${
+                isAnimating
+                  ? "translate-y-4 opacity-0"
+                  : "translate-y-0 opacity-100"
+              }`}
+              style={{ transitionDelay: isAnimating ? "0ms" : "300ms" }}
+            >
               <div className="p-4">
-                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+                <h3
+                  className={`text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 transform transition-all duration-400 ease-out ${
+                    isAnimating
+                      ? "translate-y-2 opacity-0"
+                      : "translate-y-0 opacity-100"
+                  }`}
+                  style={{ transitionDelay: isAnimating ? "0ms" : "350ms" }}
+                >
                   Categories
                 </h3>
                 <div className="space-y-1">
-                  {categories.map((category) => (
+                  {categories.map((category, index) => (
                     <Link
                       key={category.path}
                       to={category.path}
                       onClick={onClose}
-                      className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                      className={`flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-105 hover:shadow-sm hover:translate-x-2 transform ease-out ${
+                        isAnimating
+                          ? "translate-y-2 opacity-0"
+                          : "translate-y-0 opacity-100"
+                      }`}
+                      style={{
+                        transitionDelay: isAnimating
+                          ? "0ms"
+                          : `${400 + index * 50}ms`,
+                      }}
                     >
                       <span className="text-gray-700 dark:text-gray-300">
                         {category.name}
@@ -209,17 +303,36 @@ const MobileMenu = ({ isOpen, onClose }) => {
               </div>
             </div>
 
-            {/* Main Navigation */}
-            <div className="border-t border-gray-200 dark:border-gray-700">
+            {/* Main Navigation with staggered animation */}
+            <div
+              className={`border-t border-gray-200 dark:border-gray-700 transform transition-all duration-500 ease-out ${
+                isAnimating
+                  ? "translate-y-4 opacity-0"
+                  : "translate-y-0 opacity-100"
+              }`}
+              style={{ transitionDelay: isAnimating ? "0ms" : "400ms" }}
+            >
               <div className="p-4">
-                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+                <h3
+                  className={`text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 transform transition-all duration-400 ease-out ${
+                    isAnimating
+                      ? "translate-y-2 opacity-0"
+                      : "translate-y-0 opacity-100"
+                  }`}
+                  style={{ transitionDelay: isAnimating ? "0ms" : "450ms" }}
+                >
                   Menu
                 </h3>
                 <div className="space-y-1">
                   <Link
                     to="/products"
                     onClick={onClose}
-                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    className={`flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-105 hover:shadow-sm hover:translate-x-2 transform ease-out ${
+                      isAnimating
+                        ? "translate-y-2 opacity-0"
+                        : "translate-y-0 opacity-100"
+                    }`}
+                    style={{ transitionDelay: isAnimating ? "0ms" : "500ms" }}
                   >
                     <div className="flex items-center space-x-3">
                       <TagIcon className="w-5 h-5 text-gray-400" />
@@ -233,7 +346,12 @@ const MobileMenu = ({ isOpen, onClose }) => {
                   <Link
                     to="/bulk-orders"
                     onClick={onClose}
-                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    className={`flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-105 hover:shadow-sm hover:translate-x-2 transform ease-out ${
+                      isAnimating
+                        ? "translate-y-2 opacity-0"
+                        : "translate-y-0 opacity-100"
+                    }`}
+                    style={{ transitionDelay: isAnimating ? "0ms" : "550ms" }}
                   >
                     <div className="flex items-center space-x-3">
                       <BuildingOffice2Icon className="w-5 h-5 text-gray-400" />
@@ -247,7 +365,12 @@ const MobileMenu = ({ isOpen, onClose }) => {
                   <Link
                     to="/contact"
                     onClick={onClose}
-                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    className={`flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-105 hover:shadow-sm hover:translate-x-2 transform ease-out ${
+                      isAnimating
+                        ? "translate-y-2 opacity-0"
+                        : "translate-y-0 opacity-100"
+                    }`}
+                    style={{ transitionDelay: isAnimating ? "0ms" : "600ms" }}
                   >
                     <div className="flex items-center space-x-3">
                       <PhoneIcon className="w-5 h-5 text-gray-400" />
@@ -261,7 +384,12 @@ const MobileMenu = ({ isOpen, onClose }) => {
                   <Link
                     to="/help"
                     onClick={onClose}
-                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    className={`flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-105 hover:shadow-sm hover:translate-x-2 transform ease-out ${
+                      isAnimating
+                        ? "translate-y-2 opacity-0"
+                        : "translate-y-0 opacity-100"
+                    }`}
+                    style={{ transitionDelay: isAnimating ? "0ms" : "650ms" }}
                   >
                     <div className="flex items-center space-x-3">
                       <QuestionMarkCircleIcon className="w-5 h-5 text-gray-400" />
@@ -275,17 +403,36 @@ const MobileMenu = ({ isOpen, onClose }) => {
               </div>
             </div>
 
-            {/* Corporate Section */}
+            {/* Corporate Section with staggered animation */}
             {!isAuthenticated && (
-              <div className="border-t border-gray-200 dark:border-gray-700">
+              <div
+                className={`border-t border-gray-200 dark:border-gray-700 transform transition-all duration-500 ease-out ${
+                  isAnimating
+                    ? "translate-y-4 opacity-0"
+                    : "translate-y-0 opacity-100"
+                }`}
+                style={{ transitionDelay: isAnimating ? "0ms" : "500ms" }}
+              >
                 <div className="p-4">
-                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+                  <h3
+                    className={`text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 transform transition-all duration-400 ease-out ${
+                      isAnimating
+                        ? "translate-y-2 opacity-0"
+                        : "translate-y-0 opacity-100"
+                    }`}
+                    style={{ transitionDelay: isAnimating ? "0ms" : "550ms" }}
+                  >
                     For Businesses
                   </h3>
                   <Link
                     to="/corporate/register"
                     onClick={onClose}
-                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    className={`flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-105 hover:shadow-sm hover:translate-x-2 transform ease-out ${
+                      isAnimating
+                        ? "translate-y-2 opacity-0"
+                        : "translate-y-0 opacity-100"
+                    }`}
+                    style={{ transitionDelay: isAnimating ? "0ms" : "600ms" }}
                   >
                     <div className="flex items-center space-x-3">
                       <BuildingOffice2Icon className="w-5 h-5 text-gray-400" />
@@ -299,18 +446,37 @@ const MobileMenu = ({ isOpen, onClose }) => {
               </div>
             )}
 
-            {/* Account Section */}
+            {/* Account Section with staggered animation */}
             {isAuthenticated && (
-              <div className="border-t border-gray-200 dark:border-gray-700">
+              <div
+                className={`border-t border-gray-200 dark:border-gray-700 transform transition-all duration-500 ease-out ${
+                  isAnimating
+                    ? "translate-y-4 opacity-0"
+                    : "translate-y-0 opacity-100"
+                }`}
+                style={{ transitionDelay: isAnimating ? "0ms" : "550ms" }}
+              >
                 <div className="p-4">
-                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+                  <h3
+                    className={`text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 transform transition-all duration-400 ease-out ${
+                      isAnimating
+                        ? "translate-y-2 opacity-0"
+                        : "translate-y-0 opacity-100"
+                    }`}
+                    style={{ transitionDelay: isAnimating ? "0ms" : "600ms" }}
+                  >
                     Account
                   </h3>
                   <div className="space-y-1">
                     <Link
                       to="/profile"
                       onClick={onClose}
-                      className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                      className={`flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-105 hover:shadow-sm hover:translate-x-2 transform ease-out ${
+                        isAnimating
+                          ? "translate-y-2 opacity-0"
+                          : "translate-y-0 opacity-100"
+                      }`}
+                      style={{ transitionDelay: isAnimating ? "0ms" : "650ms" }}
                     >
                       <div className="flex items-center space-x-3">
                         <UserIcon className="w-5 h-5 text-gray-400" />
@@ -324,7 +490,12 @@ const MobileMenu = ({ isOpen, onClose }) => {
                     <Link
                       to="/settings"
                       onClick={onClose}
-                      className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                      className={`flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-105 hover:shadow-sm hover:translate-x-2 transform ease-out ${
+                        isAnimating
+                          ? "translate-y-2 opacity-0"
+                          : "translate-y-0 opacity-100"
+                      }`}
+                      style={{ transitionDelay: isAnimating ? "0ms" : "700ms" }}
                     >
                       <div className="flex items-center space-x-3">
                         <CogIcon className="w-5 h-5 text-gray-400" />
@@ -374,12 +545,24 @@ const MobileMenu = ({ isOpen, onClose }) => {
             )}
           </div>
 
-          {/* Footer Actions */}
+          {/* Footer Actions with staggered animation */}
           {isAuthenticated && (
-            <div className="border-t border-gray-200 dark:border-gray-700 p-4">
+            <div
+              className={`border-t border-gray-200 dark:border-gray-700 p-4 transform transition-all duration-500 ease-out ${
+                isAnimating
+                  ? "translate-y-4 opacity-0"
+                  : "translate-y-0 opacity-100"
+              }`}
+              style={{ transitionDelay: isAnimating ? "0ms" : "600ms" }}
+            >
               <button
                 onClick={handleLogout}
-                className="flex items-center space-x-3 w-full p-3 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-red-600 dark:text-red-400"
+                className={`flex items-center space-x-3 w-full p-3 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 text-red-600 dark:text-red-400 hover:scale-105 hover:shadow-sm font-medium transform ease-out ${
+                  isAnimating
+                    ? "translate-y-2 opacity-0"
+                    : "translate-y-0 opacity-100"
+                }`}
+                style={{ transitionDelay: isAnimating ? "0ms" : "650ms" }}
               >
                 <ArrowRightOnRectangleIcon className="w-5 h-5" />
                 <span>Sign Out</span>

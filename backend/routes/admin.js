@@ -1,5 +1,5 @@
 const express = require('express');
-const { body } = require('express-validator');
+const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
 const Product = require('../models/Product');
 const Order = require('../models/Order');
@@ -582,6 +582,321 @@ const broadcastValidation = [
     .withMessage('Urgent flag must be boolean')
 ];
 
+// @desc    Create new product (Admin)
+// @route   POST /api/admin/products
+// @access  Private/Admin
+const createAdminProduct = asyncHandler(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400);
+    throw new Error('Validation failed');
+  }
+
+  const {
+    name,
+    description,
+    shortDescription,
+    sku,
+    price,
+    salePrice,
+    category,
+    brand,
+    tags,
+    stock,
+    lowStockThreshold = 10,
+    status = 'active',
+    isActive = true,
+    isFeatured = false,
+    specifications,
+    dimensions,
+    corporateFeatures
+  } = req.body;
+
+  // Generate SKU if not provided
+  const productSku = sku || `PROD-${Date.now()}`;
+
+  // Handle images if provided (for FormData)
+  let images = [];
+  if (req.files && req.files.length > 0) {
+    // Handle file uploads here if needed
+    // For now, we'll accept image URLs from the body
+  }
+  
+  if (req.body.images) {
+    images = Array.isArray(req.body.images) ? req.body.images : [req.body.images];
+  }
+
+  // Parse JSON fields
+  let parsedTags = [];
+  if (tags) {
+    parsedTags = typeof tags === 'string' ? JSON.parse(tags) : tags;
+  }
+
+  let parsedSpecifications = [];
+  if (specifications) {
+    parsedSpecifications = typeof specifications === 'string' ? JSON.parse(specifications) : specifications;
+  }
+
+  let parsedDimensions = {};
+  if (dimensions) {
+    parsedDimensions = typeof dimensions === 'string' ? JSON.parse(dimensions) : dimensions;
+  }
+
+  let parsedCorporateFeatures = {};
+  if (corporateFeatures) {
+    parsedCorporateFeatures = typeof corporateFeatures === 'string' ? JSON.parse(corporateFeatures) : corporateFeatures;
+  }
+
+  const productData = {
+    name,
+    slug: name.toLowerCase().replace(/[^a-z0-9 -]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim('-'),
+    description,
+    shortDescription,
+    sku: productSku,
+    price: { 
+      regular: parseFloat(price),
+      ...(salePrice && { sale: parseFloat(salePrice) })
+    },
+    category,
+    brand,
+    tags: parsedTags,
+    inventory: { 
+      stockQuantity: parseInt(stock),
+      lowStockThreshold: parseInt(lowStockThreshold)
+    },
+    images,
+    status,
+    isActive: Boolean(isActive),
+    isFeatured: Boolean(isFeatured),
+    ...(parsedSpecifications.length > 0 && { specifications: parsedSpecifications }),
+    ...(Object.keys(parsedDimensions).length > 0 && { dimensions: parsedDimensions }),
+    ...(Object.keys(parsedCorporateFeatures).length > 0 && { corporateFeatures: parsedCorporateFeatures }),
+    createdBy: req.user._id
+  };
+
+  const product = await Product.create(productData);
+  await product.populate('category', 'name');
+
+  res.status(201).json({
+    success: true,
+    data: product,
+    message: 'Product created successfully'
+  });
+});
+
+// @desc    Get all products for admin
+// @route   GET /api/admin/products
+// @access  Private/Admin
+const getAllProducts = asyncHandler(async (req, res) => {
+  const {
+    page = 1,
+    limit = 12,
+    sort = '-createdAt',
+    category,
+    status,
+    search,
+    inStock
+  } = req.query;
+
+  // Build filter
+  let filter = {};
+  
+  if (category) {
+    filter.category = category;
+  }
+  
+  if (status) {
+    filter.status = status;
+  }
+  
+  if (search) {
+    filter.$or = [
+      { name: { $regex: search, $options: 'i' } },
+      { sku: { $regex: search, $options: 'i' } },
+      { description: { $regex: search, $options: 'i' } }
+    ];
+  }
+  
+  if (inStock === 'true') {
+    filter['inventory.stockQuantity'] = { $gt: 0 };
+  } else if (inStock === 'false') {
+    filter['inventory.stockQuantity'] = { $lte: 0 };
+  }
+
+  const products = await Product.find(filter)
+    .populate('category', 'name')
+    .populate('createdBy', 'name email')
+    .sort(sort)
+    .limit(limit * 1)
+    .skip((page - 1) * limit);
+
+  const total = await Product.countDocuments(filter);
+
+  res.json({
+    success: true,
+    data: products,
+    pagination: {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      total,
+      totalPages: Math.ceil(total / limit)
+    }
+  });
+});
+
+// @desc    Get single product for admin
+// @route   GET /api/admin/products/:id
+// @access  Private/Admin
+const getProductById = asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id)
+    .populate('category', 'name')
+    .populate('createdBy', 'name email')
+    .populate('updatedBy', 'name email');
+
+  if (!product) {
+    res.status(404);
+    throw new Error('Product not found');
+  }
+
+  res.json({
+    success: true,
+    data: product
+  });
+});
+
+// @desc    Update product
+// @route   PUT /api/admin/products/:id
+// @access  Private/Admin
+const updateProduct = asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id);
+
+  if (!product) {
+    res.status(404);
+    throw new Error('Product not found');
+  }
+
+  const {
+    name,
+    description,
+    shortDescription,
+    price,
+    salePrice,
+    category,
+    brand,
+    tags,
+    stock,
+    lowStockThreshold,
+    status,
+    isActive,
+    isFeatured,
+    specifications,
+    dimensions,
+    corporateFeatures
+  } = req.body;
+
+  // Parse JSON fields
+  let parsedTags = product.tags;
+  if (tags) {
+    parsedTags = typeof tags === 'string' ? JSON.parse(tags) : tags;
+  }
+
+  let parsedSpecifications = product.specifications;
+  if (specifications) {
+    parsedSpecifications = typeof specifications === 'string' ? JSON.parse(specifications) : specifications;
+  }
+
+  let parsedDimensions = product.dimensions;
+  if (dimensions) {
+    parsedDimensions = typeof dimensions === 'string' ? JSON.parse(dimensions) : dimensions;
+  }
+
+  let parsedCorporateFeatures = product.corporateFeatures;
+  if (corporateFeatures) {
+    parsedCorporateFeatures = typeof corporateFeatures === 'string' ? JSON.parse(corporateFeatures) : corporateFeatures;
+  }
+
+  // Handle images if provided
+  let images = product.images;
+  if (req.files && req.files.length > 0) {
+    // Handle new file uploads here if needed
+  }
+  
+  if (req.body.images) {
+    images = Array.isArray(req.body.images) ? req.body.images : [req.body.images];
+  }
+
+  const updateData = {
+    ...(name && { name }),
+    ...(description && { description }),
+    ...(shortDescription !== undefined && { shortDescription }),
+    ...(category && { category }),
+    ...(brand !== undefined && { brand }),
+    ...(parsedTags && { tags: parsedTags }),
+    ...(status && { status }),
+    ...(isActive !== undefined && { isActive: Boolean(isActive) }),
+    ...(isFeatured !== undefined && { isFeatured: Boolean(isFeatured) }),
+    ...(parsedSpecifications && { specifications: parsedSpecifications }),
+    ...(parsedDimensions && { dimensions: parsedDimensions }),
+    ...(parsedCorporateFeatures && { corporateFeatures: parsedCorporateFeatures }),
+    images,
+    updatedBy: req.user._id
+  };
+
+  // Update price
+  if (price || salePrice) {
+    updateData.price = {
+      ...product.price,
+      ...(price && { regular: parseFloat(price) }),
+      ...(salePrice && { sale: parseFloat(salePrice) })
+    };
+  }
+
+  // Update inventory
+  if (stock || lowStockThreshold) {
+    updateData.inventory = {
+      ...product.inventory,
+      ...(stock && { stockQuantity: parseInt(stock) }),
+      ...(lowStockThreshold && { lowStockThreshold: parseInt(lowStockThreshold) })
+    };
+  }
+
+  // Update slug if name changed
+  if (name && name !== product.name) {
+    updateData.slug = name.toLowerCase().replace(/[^a-z0-9 -]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim('-');
+  }
+
+  const updatedProduct = await Product.findByIdAndUpdate(
+    req.params.id,
+    updateData,
+    { new: true, runValidators: true }
+  ).populate('category', 'name');
+
+  res.json({
+    success: true,
+    data: updatedProduct,
+    message: 'Product updated successfully'
+  });
+});
+
+// @desc    Delete product
+// @route   DELETE /api/admin/products/:id
+// @access  Private/Admin
+const deleteProduct = asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id);
+
+  if (!product) {
+    res.status(404);
+    throw new Error('Product not found');
+  }
+
+  await Product.findByIdAndDelete(req.params.id);
+
+  res.json({
+    success: true,
+    message: 'Product deleted successfully'
+  });
+});
+
 // Helper functions
 const formatUptime = (seconds) => {
   const days = Math.floor(seconds / 86400);
@@ -614,5 +929,388 @@ router.get('/system/health', getSystemHealth);
 router.get('/audit-logs', authorize('super_admin'), getAuditLogs);
 router.post('/notifications/broadcast', authorize('super_admin'), broadcastValidation, broadcastNotification);
 router.get('/export/:type', exportData);
+
+// Product Management Routes
+router.get('/products', getAllProducts);
+router.get('/products/:id', getProductById);
+router.post('/products', 
+  [
+    body('name')
+      .trim()
+      .isLength({ min: 2, max: 200 })
+      .withMessage('Product name must be between 2 and 200 characters'),
+    body('description')
+      .trim()
+      .isLength({ min: 10, max: 2000 })
+      .withMessage('Description must be between 10 and 2000 characters'),
+    body('shortDescription')
+      .optional()
+      .trim()
+      .isLength({ max: 500 })
+      .withMessage('Short description cannot exceed 500 characters'),
+    body('sku')
+      .optional()
+      .trim()
+      .isLength({ min: 3, max: 50 })
+      .withMessage('SKU must be between 3 and 50 characters'),
+    body('price')
+      .isNumeric()
+      .isFloat({ min: 0 })
+      .withMessage('Price must be a positive number'),
+    body('salePrice')
+      .optional()
+      .isNumeric()
+      .isFloat({ min: 0 })
+      .withMessage('Sale price must be a positive number'),
+    body('category')
+      .isMongoId()
+      .withMessage('Valid category ID is required'),
+    body('stock')
+      .isNumeric()
+      .isInt({ min: 0 })
+      .withMessage('Stock must be a non-negative integer'),
+    body('lowStockThreshold')
+      .optional()
+      .isNumeric()
+      .isInt({ min: 0 })
+      .withMessage('Low stock threshold must be a non-negative integer'),
+    body('brand')
+      .optional()
+      .trim()
+      .isLength({ max: 100 })
+      .withMessage('Brand name cannot exceed 100 characters'),
+    body('status')
+      .optional()
+      .isIn(['active', 'inactive', 'draft', 'archived'])
+      .withMessage('Valid status is required')
+  ], 
+  createAdminProduct
+);
+router.put('/products/:id', updateProduct);
+router.delete('/products/:id', deleteProduct);
+
+// User Routes
+router.get('/users', async (req, res) => {
+  try {
+    const { 
+      page = 1, 
+      limit = 10, 
+      status, 
+      type, 
+      search,
+      sortBy = 'createdAt',
+      sortOrder = 'desc'
+    } = req.query;
+
+    let filter = {};
+    
+    if (status && status !== 'all') {
+      filter.status = status;
+    }
+    
+    if (type && type !== 'all') {
+      filter.type = type;
+    }
+    
+    if (search) {
+      filter.$or = [
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const sortOptions = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };
+
+    const users = await User.find(filter)
+      .select('-password')
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean();
+
+    const total = await User.countDocuments(filter);
+
+    res.status(200).json({
+      success: true,
+      data: users,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    });
+  } catch (error) {
+    console.error('Get users error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch users'
+    });
+  }
+});
+
+router.get('/users/:id', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select('-password').lean();
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: user
+    });
+  } catch (error) {
+    console.error('Get user error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch user'
+    });
+  }
+});
+
+router.put('/users/:id', async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const updateData = req.body;
+
+    // Remove sensitive fields that shouldn't be updated via this endpoint
+    delete updateData.password;
+    delete updateData._id;
+    delete updateData.createdAt;
+    delete updateData.updatedAt;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { ...updateData, updatedAt: new Date() },
+      { new: true, runValidators: true }
+    ).select('-password').lean();
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: updatedUser,
+      message: 'User updated successfully'
+    });
+  } catch (error) {
+    console.error('Update user error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to update user'
+    });
+  }
+});
+
+router.delete('/users/:id', async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { permanent } = req.query;
+
+    if (permanent === 'true') {
+      // Permanent deletion
+      const deletedUser = await User.findByIdAndDelete(userId);
+      
+      if (!deletedUser) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        data: { _id: userId },
+        message: 'User permanently deleted successfully'
+      });
+    } else {
+      // Soft deletion - just deactivate
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { 
+          status: 'inactive',
+          isActive: false,
+          deactivatedAt: new Date(),
+          updatedAt: new Date()
+        },
+        { new: true, runValidators: true }
+      ).select('-password').lean();
+
+      if (!updatedUser) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        data: updatedUser,
+        message: 'User deactivated successfully'
+      });
+    }
+  } catch (error) {
+    console.error('Delete user error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete user'
+    });
+  }
+});
+
+// Order Routes
+router.get('/orders', async (req, res) => {
+  try {
+    const { 
+      page = 1, 
+      limit = 10, 
+      status, 
+      search,
+      startDate,
+      endDate,
+      sortBy = 'createdAt',
+      sortOrder = 'desc'
+    } = req.query;
+
+    let filter = {};
+    
+    if (status && status !== 'all') {
+      filter.status = status;
+    }
+    
+    if (startDate || endDate) {
+      filter.createdAt = {};
+      if (startDate) filter.createdAt.$gte = new Date(startDate);
+      if (endDate) filter.createdAt.$lte = new Date(endDate);
+    }
+    
+    if (search) {
+      filter.$or = [
+        { orderNumber: { $regex: search, $options: 'i' } },
+        { 'shippingAddress.email': { $regex: search, $options: 'i' } },
+        { 'corporateInfo.companyName': { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const sortOptions = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };
+
+    const orders = await Order.find(filter)
+      .populate('user', 'firstName lastName email')
+      .populate('items.product', 'name images price')
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean();
+
+    const total = await Order.countDocuments(filter);
+
+    res.status(200).json({
+      success: true,
+      data: orders,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    });
+  } catch (error) {
+    console.error('Get orders error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch orders'
+    });
+  }
+});
+
+router.get('/orders/:id', async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id)
+      .populate('user', 'firstName lastName email phone')
+      .populate('items.product', 'name images price sku')
+      .lean();
+    
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: order
+    });
+  } catch (error) {
+    console.error('Get order error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch order'
+    });
+  }
+});
+
+// Category Routes
+router.get('/categories', async (req, res) => {
+  try {
+    const { active = 'all' } = req.query;
+    
+    let filter = {};
+    if (active !== 'all') {
+      filter.isActive = active === 'true';
+    }
+
+    const categories = await Category.find(filter)
+      .sort({ order: 1, name: 1 })
+      .lean();
+
+    res.status(200).json({
+      success: true,
+      data: categories
+    });
+  } catch (error) {
+    console.error('Get categories error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch categories'
+    });
+  }
+});
+
+router.get('/categories/:id', async (req, res) => {
+  try {
+    const category = await Category.findById(req.params.id).lean();
+    
+    if (!category) {
+      return res.status(404).json({
+        success: false,
+        message: 'Category not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: category
+    });
+  } catch (error) {
+    console.error('Get category error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch category'
+    });
+  }
+});
 
 module.exports = router;

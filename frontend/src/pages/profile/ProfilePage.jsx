@@ -15,6 +15,11 @@ import {
   TrashIcon,
   CheckIcon,
   XMarkIcon,
+  SparklesIcon,
+  HeartIcon,
+  GiftIcon,
+  CogIcon,
+  ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
 import {
   updateUserProfile,
@@ -203,21 +208,31 @@ const ProfilePage = () => {
   const tabs = [
     { id: "profile", name: "Profile", icon: UserIcon },
     { id: "addresses", name: "Addresses", icon: MapPinIcon },
-    { id: "security", name: "Security", icon: LockClosedIcon },
+    { id: "security", name: "Security", icon: ShieldCheckIcon },
     { id: "notifications", name: "Notifications", icon: BellIcon },
     { id: "orders", name: "Order History", icon: ShoppingBagIcon },
   ];
 
   const renderProfileTab = () => (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-6">
-        Personal Information
-      </h3>
+    <div className="p-4 sm:p-6">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 bg-purple-600 rounded-lg">
+          <UserIcon className="w-5 h-5 text-white" />
+        </div>
+        <div>
+          <h3 className="text-xl font-bold text-gray-900">
+            Personal Information
+          </h3>
+          <p className="text-gray-600 text-sm">
+            Update your profile details
+          </p>
+        </div>
+      </div>
 
       <form onSubmit={handleProfileUpdate} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               First Name *
             </label>
             <input
@@ -227,12 +242,13 @@ const ProfilePage = () => {
               onChange={(e) =>
                 setProfileForm({ ...profileForm, firstName: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+              placeholder="Enter your first name"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Last Name *
             </label>
             <input
@@ -242,12 +258,13 @@ const ProfilePage = () => {
               onChange={(e) =>
                 setProfileForm({ ...profileForm, lastName: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+              placeholder="Enter your last name"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Email Address *
             </label>
             <input
@@ -257,12 +274,13 @@ const ProfilePage = () => {
               onChange={(e) =>
                 setProfileForm({ ...profileForm, email: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+              placeholder="Enter your email address"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Phone Number
             </label>
             <input
@@ -271,12 +289,13 @@ const ProfilePage = () => {
               onChange={(e) =>
                 setProfileForm({ ...profileForm, phone: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+              placeholder="Enter your phone number"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Date of Birth
             </label>
             <input
@@ -285,12 +304,12 @@ const ProfilePage = () => {
               onChange={(e) =>
                 setProfileForm({ ...profileForm, dateOfBirth: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Gender
             </label>
             <select
@@ -298,7 +317,7 @@ const ProfilePage = () => {
               onChange={(e) =>
                 setProfileForm({ ...profileForm, gender: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
             >
               <option value="">Select Gender</option>
               <option value="male">Male</option>
@@ -309,95 +328,117 @@ const ProfilePage = () => {
           </div>
         </div>
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full md:w-auto px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
-        >
-          {isLoading ? "Updating..." : "Update Profile"}
-        </button>
+        <div className="pt-4">
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full sm:w-auto bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 transition-colors"
+          >
+            {isLoading ? (
+              <span className="flex items-center justify-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                Updating...
+              </span>
+            ) : (
+              "Update Profile"
+            )}
+          </button>
+        </div>
       </form>
     </div>
   );
 
   const renderAddressesTab = () => (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-          Saved Addresses
-        </h3>
+    <div className="p-4 sm:p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-purple-600 rounded-lg">
+            <MapPinIcon className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-gray-900">
+              Saved Addresses
+            </h3>
+            <p className="text-gray-600 text-sm">
+              Manage your delivery addresses
+            </p>
+          </div>
+        </div>
         <button
           onClick={() => setShowAddressForm(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+          className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
         >
-          <PlusIcon className="w-4 h-4" />
           Add Address
         </button>
       </div>
 
       {addresses.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-4">
           {addresses.map((address) => (
             <div
               key={address.id}
-              className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+              className="border border-gray-200 rounded-lg p-4"
             >
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`px-2 py-1 text-xs rounded-full ${
-                      address.type === "home"
-                        ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                        : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                    }`}
-                  >
-                    {address.type.charAt(0).toUpperCase() +
-                      address.type.slice(1)}
-                  </span>
-                  {address.isDefault && (
-                    <span className="px-2 py-1 text-xs bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-200 rounded-full">
-                      Default
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span
+                      className={`px-2 py-1 text-xs rounded ${
+                        address.type === "home"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-green-100 text-green-800"
+                      }`}
+                    >
+                      {address.type.charAt(0).toUpperCase() +
+                        address.type.slice(1)}
                     </span>
-                  )}
+                    {address.isDefault && (
+                      <span className="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded">
+                        Default
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-sm text-gray-900">
+                    <p className="font-medium">
+                      {address.firstName} {address.lastName}
+                    </p>
+                    <p>{address.address}</p>
+                    <p>
+                      {address.city}, {address.state} {address.zipCode}
+                    </p>
+                    <p>{address.country}</p>
+                  </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 ml-4">
                   <button
                     onClick={() => handleEditAddress(address)}
-                    className="text-gray-500 hover:text-primary-600"
+                    className="text-purple-600 hover:text-purple-700 text-sm"
                   >
-                    <PencilIcon className="w-4 h-4" />
+                    Edit
                   </button>
                   <button
                     onClick={() => handleDeleteAddress(address.id)}
-                    className="text-gray-500 hover:text-red-600"
+                    className="text-red-600 hover:text-red-700 text-sm"
                   >
-                    <TrashIcon className="w-4 h-4" />
+                    Delete
                   </button>
                 </div>
-              </div>
-
-              <div className="text-sm text-gray-900 dark:text-white">
-                <p className="font-medium">
-                  {address.firstName} {address.lastName}
-                </p>
-                <p>{address.address}</p>
-                <p>
-                  {address.city}, {address.state} {address.zipCode}
-                </p>
-                <p>{address.country}</p>
               </div>
             </div>
           ))}
         </div>
       ) : (
         <div className="text-center py-8">
-          <MapPinIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            No saved addresses
+          <MapPinIcon className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+          <h4 className="text-lg font-medium text-gray-900 mb-2">
+            No addresses yet
+          </h4>
+          <p className="text-gray-600 text-sm mb-4">
+            Add your first address to get started
           </p>
           <button
             onClick={() => setShowAddressForm(true)}
-            className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+            className="bg-purple-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors"
           >
             Add Your First Address
           </button>
@@ -406,10 +447,10 @@ const ProfilePage = () => {
 
       {/* Address Form Modal */}
       {showAddressForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+              <h3 className="text-lg font-medium text-gray-900">
                 {editingAddress ? "Edit Address" : "Add New Address"}
               </h3>
               <button
@@ -417,7 +458,7 @@ const ProfilePage = () => {
                   setShowAddressForm(false);
                   setEditingAddress(null);
                 }}
-                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                className="text-gray-500 hover:text-gray-700"
               >
                 <XMarkIcon className="w-6 h-6" />
               </button>
@@ -593,14 +634,24 @@ const ProfilePage = () => {
   );
 
   const renderSecurityTab = () => (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-6">
-        Change Password
-      </h3>
+    <div className="p-4 sm:p-6">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 bg-purple-600 rounded-lg">
+          <ShieldCheckIcon className="w-5 h-5 text-white" />
+        </div>
+        <div>
+          <h3 className="text-xl font-bold text-gray-900">
+            Security Settings
+          </h3>
+          <p className="text-gray-600 text-sm">
+            Manage your account security
+          </p>
+        </div>
+      </div>
 
       <form onSubmit={handlePasswordChange} className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Current Password *
           </label>
           <div className="relative">
@@ -614,7 +665,8 @@ const ProfilePage = () => {
                   currentPassword: e.target.value,
                 })
               }
-              className="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+              placeholder="Enter current password"
             />
             <button
               type="button"
@@ -630,104 +682,123 @@ const ProfilePage = () => {
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            New Password *
-          </label>
-          <div className="relative">
-            <input
-              type={showNewPassword ? "text" : "password"}
-              required
-              value={passwordForm.newPassword}
-              onChange={(e) =>
-                setPasswordForm({
-                  ...passwordForm,
-                  newPassword: e.target.value,
-                })
-              }
-              className="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
-            />
-            <button
-              type="button"
-              onClick={() => setShowNewPassword(!showNewPassword)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-            >
-              {showNewPassword ? (
-                <EyeSlashIcon className="w-5 h-5" />
-              ) : (
-                <EyeIcon className="w-5 h-5" />
-              )}
-            </button>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              New Password *
+            </label>
+            <div className="relative">
+              <input
+                type={showNewPassword ? "text" : "password"}
+                required
+                value={passwordForm.newPassword}
+                onChange={(e) =>
+                  setPasswordForm({
+                    ...passwordForm,
+                    newPassword: e.target.value,
+                  })
+                }
+                className="w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                placeholder="Enter new password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+              >
+                {showNewPassword ? (
+                  <EyeSlashIcon className="w-5 h-5" />
+                ) : (
+                  <EyeIcon className="w-5 h-5" />
+                )}
+              </button>
+            </div>
           </div>
-        </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Confirm New Password *
-          </label>
-          <div className="relative">
-            <input
-              type={showConfirmPassword ? "text" : "password"}
-              required
-              value={passwordForm.confirmPassword}
-              onChange={(e) =>
-                setPasswordForm({
-                  ...passwordForm,
-                  confirmPassword: e.target.value,
-                })
-              }
-              className="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-            >
-              {showConfirmPassword ? (
-                <EyeSlashIcon className="w-5 h-5" />
-              ) : (
-                <EyeIcon className="w-5 h-5" />
-              )}
-            </button>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Confirm Password *
+            </label>
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                required
+                value={passwordForm.confirmPassword}
+                onChange={(e) =>
+                  setPasswordForm({
+                    ...passwordForm,
+                    confirmPassword: e.target.value,
+                  })
+                }
+                className="w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                placeholder="Confirm new password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+              >
+                {showConfirmPassword ? (
+                  <EyeSlashIcon className="w-5 h-5" />
+                ) : (
+                  <EyeIcon className="w-5 h-5" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full md:w-auto px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
+          className="w-full sm:w-auto bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 transition-colors"
         >
-          {isLoading ? "Changing..." : "Change Password"}
+          {isLoading ? (
+            <span className="flex items-center justify-center gap-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              Updating...
+            </span>
+          ) : (
+            "Update Password"
+          )}
         </button>
       </form>
     </div>
   );
 
+
   const renderNotificationsTab = () => (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-6">
-        Notification Preferences
-      </h3>
+    <div className="p-4 sm:p-6">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 bg-purple-600 rounded-lg">
+          <BellIcon className="w-5 h-5 text-white" />
+        </div>
+        <div>
+          <h3 className="text-xl font-bold text-gray-900">
+            Notification Preferences
+          </h3>
+          <p className="text-gray-600 text-sm">
+            Choose how you want to be notified
+          </p>
+        </div>
+      </div>
 
       <div className="space-y-4">
         {[
           {
             key: "orderUpdates",
             title: "Order Updates",
-            description:
-              "Get notified about order confirmations, shipping updates, and delivery confirmations",
+            description: "Get notified about order confirmations and shipping updates",
           },
           {
             key: "promotions",
             title: "Promotional Offers",
-            description:
-              "Receive emails about sales, discounts, and special promotions",
+            description: "Receive emails about sales, discounts, and special promotions",
           },
           {
             key: "newsletter",
             title: "Newsletter",
-            description:
-              "Stay updated with new products, features, and company news",
+            description: "Stay updated with new products and company news",
           },
           {
             key: "smsNotifications",
@@ -737,17 +808,17 @@ const ProfilePage = () => {
         ].map((setting) => (
           <div
             key={setting.key}
-            className="flex items-start justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+            className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0"
           >
             <div className="flex-1">
-              <h4 className="font-medium text-gray-900 dark:text-white mb-1">
+              <h4 className="font-medium text-gray-900 mb-1">
                 {setting.title}
               </h4>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-gray-600">
                 {setting.description}
               </p>
             </div>
-            <label className="relative inline-flex items-center cursor-pointer">
+            <label className="relative inline-flex items-center cursor-pointer ml-4">
               <input
                 type="checkbox"
                 checked={notificationSettings[setting.key]}
@@ -756,7 +827,7 @@ const ProfilePage = () => {
                 }
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+              <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
             </label>
           </div>
         ))}
@@ -765,16 +836,26 @@ const ProfilePage = () => {
   );
 
   const renderOrdersTab = () => (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-          Recent Orders
-        </h3>
+    <div className="p-4 sm:p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-purple-600 rounded-lg">
+            <ShoppingBagIcon className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-gray-900">
+              Order History
+            </h3>
+            <p className="text-gray-600 text-sm">
+              Track your orders and purchases
+            </p>
+          </div>
+        </div>
         <a
           href="/orders"
-          className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+          className="text-purple-600 hover:text-purple-700 text-sm font-medium"
         >
-          View All Orders →
+          View All →
         </a>
       </div>
 
@@ -783,100 +864,123 @@ const ProfilePage = () => {
           {recentOrders.map((order) => (
             <div
               key={order.id}
-              className="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+              className="border border-gray-200 rounded-lg p-4"
             >
-              <div className="flex justify-between items-start mb-3">
-                <div>
-                  <h4 className="font-medium text-gray-900 dark:text-white">
-                    Order #{order.orderNumber}
-                  </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {new Date(order.createdAt).toLocaleDateString()} • $
-                    {order.total.toFixed(2)}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h4 className="font-medium text-gray-900">
+                      Order #{order.orderNumber}
+                    </h4>
+                    <span
+                      className={`text-xs px-2 py-1 rounded ${
+                        order.status === "delivered"
+                          ? "bg-green-100 text-green-800"
+                          : order.status === "shipped"
+                          ? "bg-blue-100 text-blue-800"
+                          : order.status === "processing"
+                          ? "bg-purple-100 text-purple-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    {new Date(order.createdAt).toLocaleDateString()} • ${order.total.toFixed(2)}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {order.items?.length || 0} items
                   </p>
                 </div>
-                <span
-                  className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    order.status === "delivered"
-                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                      : order.status === "shipped"
-                        ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                        : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-                  }`}
-                >
-                  {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                {order.items.slice(0, 3).map((item, index) => (
-                  <img
-                    key={index}
-                    src={item.image}
-                    alt={item.name}
-                    className="w-8 h-8 object-cover rounded"
-                  />
-                ))}
-                {order.items.length > 3 && (
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    +{order.items.length - 3} more
-                  </span>
-                )}
+                <button className="text-purple-600 hover:text-purple-700 text-sm font-medium">
+                  View Details
+                </button>
               </div>
             </div>
           ))}
         </div>
       ) : (
         <div className="text-center py-8">
-          <ShoppingBagIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">No recent orders</p>
+          <ShoppingBagIcon className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+          <h4 className="text-lg font-medium text-gray-900 mb-2">
+            No orders yet
+          </h4>
+          <p className="text-gray-600 text-sm">
+            Start shopping to see your orders here
+          </p>
         </div>
       )}
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            My Account
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Manage your account settings and preferences
-          </p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Compact Header */}
+      <div className="bg-gradient-to-r from-purple-600 to-pink-600">
+        <div className="max-w-5xl mx-auto px-4 py-8 sm:py-12">
+          <div className="text-center">
+            <div className="inline-flex items-center justify-center w-12 h-12 bg-white/20 rounded-full mb-4">
+              <UserIcon className="w-6 h-6 text-white" />
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+              My Account
+            </h1>
+            <p className="text-white/80 text-sm sm:text-base">
+              Manage your profile and preferences
+            </p>
+          </div>
         </div>
+      </div>
 
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar */}
+      <div className="max-w-5xl mx-auto px-4 py-6">
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Compact Sidebar */}
           <div className="lg:w-64">
-            <nav className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
-              <ul className="space-y-2">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+              {/* User Profile Summary */}
+              <div className="text-center mb-6 pb-4 border-b border-gray-100">
+                <div className="relative inline-block mb-3">
+                  <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white text-lg font-bold">
+                    {user?.firstName?.[0]}{user?.lastName?.[0]}
+                  </div>
+                  <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-400 rounded-full border-2 border-white"></div>
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 mb-1">
+                  {user?.firstName} {user?.lastName}
+                </h3>
+                <p className="text-gray-600 text-sm">{user?.email}</p>
+              </div>
+
+              {/* Navigation */}
+              <nav className="space-y-1">
                 {tabs.map((tab) => (
-                  <li key={tab.id}>
-                    <button
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg transition-colors ${
-                        activeTab === tab.id
-                          ? "bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400"
-                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                      }`}
-                    >
-                      <tab.icon className="w-5 h-5" />
-                      {tab.name}
-                    </button>
-                  </li>
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 text-left rounded-lg transition-all duration-200 text-sm ${
+                      activeTab === tab.id
+                        ? "bg-purple-600 text-white shadow-md"
+                        : "text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    <tab.icon className="w-4 h-4" />
+                    <span className="font-medium">{tab.name}</span>
+                  </button>
                 ))}
-              </ul>
-            </nav>
+              </nav>
+            </div>
           </div>
 
           {/* Main Content */}
           <div className="flex-1">
-            {activeTab === "profile" && renderProfileTab()}
-            {activeTab === "addresses" && renderAddressesTab()}
-            {activeTab === "security" && renderSecurityTab()}
-            {activeTab === "notifications" && renderNotificationsTab()}
-            {activeTab === "orders" && renderOrdersTab()}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+              {activeTab === "profile" && renderProfileTab()}
+              {activeTab === "addresses" && renderAddressesTab()}
+              {activeTab === "security" && renderSecurityTab()}
+              {activeTab === "notifications" && renderNotificationsTab()}
+              {activeTab === "orders" && renderOrdersTab()}
+            </div>
           </div>
         </div>
       </div>

@@ -133,19 +133,19 @@ const Header = () => {
         </div>
 
         {/* Main Header */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <div className="flex items-center flex-shrink-0">
+            <div className="flex items-center flex-shrink-0 min-w-0">
               <Link to="/" className="flex items-center space-x-2">
-                <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center shadow-md">
-                  <span className="text-xl">🎁</span>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
+                  <span className="text-lg sm:text-xl">🎁</span>
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-xl font-bold text-gray-900 leading-none">
+                <div className="flex flex-col min-w-0">
+                  <span className="text-lg sm:text-xl font-bold text-gray-900 leading-none truncate">
                     Gift Galore
                   </span>
-                  <span className="text-xs text-gray-500 font-medium">
+                  <span className="text-xs text-gray-500 font-medium hidden sm:block">
                     Premium Gifts
                   </span>
                 </div>
@@ -246,7 +246,7 @@ const Header = () => {
             </div>
 
             {/* Right Actions */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
               {/* Mobile Search Toggle */}
               <button
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
@@ -288,23 +288,23 @@ const Header = () => {
                 <div className="relative" ref={userDropdownRef}>
                   <button
                     onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                    className="flex items-center space-x-2 p-1.5 text-gray-600 hover:text-yellow-600 transition-colors bg-gray-50 rounded-lg"
+                    className="flex items-center space-x-1 sm:space-x-2 p-1.5 text-gray-600 hover:text-yellow-600 transition-colors bg-gray-50 rounded-lg"
                   >
                     {user?.avatar ? (
                       <img
                         src={user.avatar}
                         alt={`${user.firstName} ${user.lastName}`}
-                        className="w-7 h-7 rounded-full object-cover"
+                        className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover flex-shrink-0"
                       />
                     ) : (
-                      <div className="w-7 h-7 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
-                        <UserIcon className="w-4 h-4 text-white" />
+                      <div className="w-6 h-6 sm:w-7 sm:h-7 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <UserIcon className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                       </div>
                     )}
-                    <span className="hidden sm:block font-medium text-sm">
+                    <span className="hidden sm:block font-medium text-sm truncate max-w-20">
                       {user?.firstName || "User"}
                     </span>
-                    <ChevronDownIcon className="w-3 h-3" />
+                    <ChevronDownIcon className="w-3 h-3 flex-shrink-0" />
                   </button>
 
                   {isUserDropdownOpen && (
@@ -359,26 +359,27 @@ const Header = () => {
                   )}
                 </div>
               ) : (
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1 sm:space-x-2">
                   <Link
                     to="/login"
-                    className="font-medium text-gray-700 hover:text-yellow-600 transition-colors px-3 py-2 text-sm"
+                    className="font-medium text-gray-700 hover:text-yellow-600 transition-colors px-2 sm:px-3 py-2 text-sm"
                   >
                     Sign In
                   </Link>
                   <Link
                     to="/register"
-                    className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black px-4 py-1.5 font-medium transition-all rounded-lg text-sm shadow-sm"
+                    className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black px-2 sm:px-4 py-1.5 font-medium transition-all rounded-lg text-sm shadow-sm"
                   >
                     Sign Up
                   </Link>
                 </div>
               )}
 
-              {/* Mobile Menu Toggle */}
+              {/* Mobile Menu Toggle - Enhanced for better visibility */}
               <button
                 onClick={handleMobileMenuToggle}
-                className="lg:hidden p-2 text-gray-600 hover:text-yellow-600 transition-colors ml-1"
+                className="lg:hidden p-2.5 text-gray-600 hover:text-yellow-600 hover:bg-gray-50 active:bg-gray-100 transition-all rounded-lg ml-1 flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                aria-label="Toggle mobile menu"
               >
                 {isMobileMenuOpen ? (
                   <XMarkIcon className="w-6 h-6" />

@@ -75,6 +75,29 @@ const productAPI = {
     return api.put(`/products/${productId}/stock`, { quantity });
   },
 
+  // Add new product (admin only)
+  addProduct: (productData) => {
+    // Check if productData is FormData (for file uploads)
+    if (productData instanceof FormData) {
+      return api.post('/products', productData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+    }
+    return api.post('/products', productData);
+  },
+
+  // Update product (admin only)
+  updateProduct: (productId, productData) => {
+    return api.put(`/products/${productId}`, productData);
+  },
+
+  // Delete product (admin only)
+  deleteProduct: (productId) => {
+    return api.delete(`/products/${productId}`);
+  },
+
   // Get product questions
   getProductQuestions: (productId, params = {}) => {
     return api.get(`/products/${productId}/questions`, { params });

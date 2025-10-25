@@ -103,7 +103,7 @@ const categorySlice = createSlice({
       })
       .addCase(fetchCategories.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.categories = action.payload.data.categories;
+        state.categories = action.payload.data;
         state.error = null;
       })
       .addCase(fetchCategories.rejected, (state, action) => {

@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import adminAPI from '../../services/adminAPI';
+import categoryAPI from '../../services/categoryAPI';
 
 // Initial state
 const initialState = {
@@ -137,6 +138,34 @@ export const updateUserStatus = createAsyncThunk(
   }
 );
 
+export const createUser = createAsyncThunk(
+  'admin/createUser',
+  async (userData, { rejectWithValue }) => {
+    try {
+      const response = await adminAPI.createUser(userData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to create user'
+      );
+    }
+  }
+);
+
+export const updateUser = createAsyncThunk(
+  'admin/updateUser',
+  async ({ userId, userData }, { rejectWithValue }) => {
+    try {
+      const response = await adminAPI.updateUser(userId, userData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to update user'
+      );
+    }
+  }
+);
+
 export const deleteUser = createAsyncThunk(
   'admin/deleteUser',
   async (userId, { rejectWithValue }) => {
@@ -240,8 +269,11 @@ export const fetchAllCategories = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await adminAPI.getAllCategories();
+      console.log('AdminSlice - fetchAllCategories response:', response);
+      console.log('AdminSlice - response.data:', response.data);
       return response.data;
     } catch (error) {
+      console.error('AdminSlice - fetchAllCategories error:', error);
       return rejectWithValue(
         error.response?.data?.message || 'Failed to fetch categories'
       );
@@ -462,7 +494,7 @@ const adminSlice = createSlice({
       })
       .addCase(fetchDashboardStats.fulfilled, (state, action) => {
         state.statsLoading = false;
-        state.dashboardStats = action.payload.data.stats;
+        state.dashboardStats = action.payload.data;
         state.error = null;
       })
       .addCase(fetchDashboardStats.rejected, (state, action) => {
@@ -477,12 +509,12 @@ const adminSlice = createSlice({
       })
       .addCase(fetchAllUsers.fulfilled, (state, action) => {
         state.usersLoading = false;
-        state.users = action.payload.data.users;
+        state.users = action.payload.data;
         state.usersPagination = {
-          currentPage: action.payload.data.currentPage,
-          totalPages: action.payload.data.totalPages,
-          totalUsers: action.payload.data.totalUsers,
-          limit: action.payload.data.limit,
+          currentPage: action.payload.pagination.page,
+          totalPages: action.payload.pagination.totalPages,
+          totalUsers: action.payload.pagination.total,
+          limit: action.payload.pagination.limit,
         };
         state.error = null;
       })
@@ -493,12 +525,42 @@ const adminSlice = createSlice({
 
       // Fetch User By ID
       .addCase(fetchUserById.fulfilled, (state, action) => {
-        state.currentUser = action.payload.data.user;
+        state.currentUser = action.payload.data;
       })
 
       // Update User Status
       .addCase(updateUserStatus.fulfilled, (state, action) => {
-        const updatedUser = action.payload.data.user;
+        const updatedUser = action.payload.data;
+        const userIndex = state.users.findIndex(user => user._id === updatedUser._id);
+        if (userIndex !== -1) {
+          state.users[userIndex] = updatedUser;
+        }
+        if (state.currentUser && state.currentUser._id === updatedUser._id) {
+          state.currentUser = updatedUser;
+        }
+        state.error = null;
+      })
+
+      // Create User
+      .addCase(createUser.pending, (state) => {
+        state.usersLoading = true;
+        state.error = null;
+      })
+      .addCase(createUser.fulfilled, (state, action) => {
+        state.usersLoading = false;
+        const newUser = action.payload.data;
+        state.users.unshift(newUser); // Add new user to the beginning of the array
+        state.usersPagination.totalUsers += 1;
+        state.error = null;
+      })
+      .addCase(createUser.rejected, (state, action) => {
+        state.usersLoading = false;
+        state.error = action.payload || 'Failed to create user';
+      })
+
+      // Update User
+      .addCase(updateUser.fulfilled, (state, action) => {
+        const updatedUser = action.payload.data;
         const userIndex = state.users.findIndex(user => user._id === updatedUser._id);
         if (userIndex !== -1) {
           state.users[userIndex] = updatedUser;
@@ -524,12 +586,12 @@ const adminSlice = createSlice({
       })
       .addCase(fetchAllProducts.fulfilled, (state, action) => {
         state.productsLoading = false;
-        state.adminProducts = action.payload.data.products;
+        state.adminProducts = action.payload.data;
         state.productsPagination = {
-          currentPage: action.payload.data.currentPage,
-          totalPages: action.payload.data.totalPages,
-          totalProducts: action.payload.data.totalProducts,
-          limit: action.payload.data.limit,
+          currentPage: action.payload.pagination.page,
+          totalPages: action.payload.pagination.totalPages,
+          totalProducts: action.payload.pagination.total,
+          limit: action.payload.pagination.limit,
         };
         state.error = null;
       })
@@ -540,12 +602,12 @@ const adminSlice = createSlice({
 
       // Create Product
       .addCase(createProduct.fulfilled, (state, action) => {
-        state.adminProducts.unshift(action.payload.data.product);
+        state.adminProducts.unshift(action.payload.data);
       })
 
       // Update Product
       .addCase(updateProduct.fulfilled, (state, action) => {
-        const updatedProduct = action.payload.data.product;
+        const updatedProduct = action.payload.data;
         const productIndex = state.adminProducts.findIndex(product => product._id === updatedProduct._id);
         if (productIndex !== -1) {
           state.adminProducts[productIndex] = updatedProduct;
@@ -557,7 +619,7 @@ const adminSlice = createSlice({
 
       // Update Product Status
       .addCase(updateProductStatus.fulfilled, (state, action) => {
-        const updatedProduct = action.payload.data.product;
+        const updatedProduct = action.payload.data;
         const productIndex = state.adminProducts.findIndex(product => product._id === updatedProduct._id);
         if (productIndex !== -1) {
           state.adminProducts[productIndex] = updatedProduct;
@@ -583,12 +645,12 @@ const adminSlice = createSlice({
       })
       .addCase(fetchAllOrders.fulfilled, (state, action) => {
         state.ordersLoading = false;
-        state.adminOrders = action.payload.data.orders;
+        state.adminOrders = action.payload.data;
         state.ordersPagination = {
-          currentPage: action.payload.data.currentPage,
-          totalPages: action.payload.data.totalPages,
-          totalOrders: action.payload.data.totalOrders,
-          limit: action.payload.data.limit,
+          currentPage: action.payload.pagination.page,
+          totalPages: action.payload.pagination.totalPages,
+          totalOrders: action.payload.pagination.total,
+          limit: action.payload.pagination.limit,
         };
         state.error = null;
       })
@@ -599,7 +661,7 @@ const adminSlice = createSlice({
 
       // Update Order Status
       .addCase(updateOrderStatus.fulfilled, (state, action) => {
-        const updatedOrder = action.payload.data.order;
+        const updatedOrder = action.payload.data;
         const orderIndex = state.adminOrders.findIndex(order => order._id === updatedOrder._id);
         if (orderIndex !== -1) {
           state.adminOrders[orderIndex] = updatedOrder;
@@ -611,13 +673,15 @@ const adminSlice = createSlice({
 
       // Categories
       .addCase(fetchAllCategories.fulfilled, (state, action) => {
-        state.adminCategories = action.payload.data.categories;
+        console.log('AdminSlice reducer - fetchAllCategories.fulfilled action.payload:', action.payload);
+        console.log('AdminSlice reducer - action.payload.data:', action.payload.data);
+        state.adminCategories = action.payload.data; // categoryAPI returns { success: true, data: [...] }
       })
       .addCase(createCategory.fulfilled, (state, action) => {
-        state.adminCategories.push(action.payload.data.category);
+        state.adminCategories.push(action.payload.data);
       })
       .addCase(updateCategory.fulfilled, (state, action) => {
-        const updatedCategory = action.payload.data.category;
+        const updatedCategory = action.payload.data;
         const categoryIndex = state.adminCategories.findIndex(cat => cat._id === updatedCategory._id);
         if (categoryIndex !== -1) {
           state.adminCategories[categoryIndex] = updatedCategory;
@@ -630,13 +694,13 @@ const adminSlice = createSlice({
 
       // Coupons
       .addCase(fetchAllCoupons.fulfilled, (state, action) => {
-        state.adminCoupons = action.payload.data.coupons;
+        state.adminCoupons = action.payload.data;
       })
       .addCase(createCoupon.fulfilled, (state, action) => {
-        state.adminCoupons.unshift(action.payload.data.coupon);
+        state.adminCoupons.unshift(action.payload.data);
       })
       .addCase(updateCoupon.fulfilled, (state, action) => {
-        const updatedCoupon = action.payload.data.coupon;
+        const updatedCoupon = action.payload.data;
         const couponIndex = state.adminCoupons.findIndex(coupon => coupon._id === updatedCoupon._id);
         if (couponIndex !== -1) {
           state.adminCoupons[couponIndex] = updatedCoupon;
@@ -649,13 +713,13 @@ const adminSlice = createSlice({
 
       // Corporate Accounts
       .addCase(fetchCorporateAccounts.fulfilled, (state, action) => {
-        state.corporateAccounts = action.payload.data.accounts;
-        state.pendingCorporateApprovals = action.payload.data.accounts.filter(
+        state.corporateAccounts = action.payload.data;
+        state.pendingCorporateApprovals = action.payload.data.filter(
           account => account.status === 'pending'
         );
       })
       .addCase(approveCorporateAccount.fulfilled, (state, action) => {
-        const updatedAccount = action.payload.data.account;
+        const updatedAccount = action.payload.data;
         const accountIndex = state.corporateAccounts.findIndex(acc => acc._id === updatedAccount._id);
         if (accountIndex !== -1) {
           state.corporateAccounts[accountIndex] = updatedAccount;
@@ -667,10 +731,10 @@ const adminSlice = createSlice({
 
       // System Settings
       .addCase(fetchSystemSettings.fulfilled, (state, action) => {
-        state.systemSettings = action.payload.data.settings;
+        state.systemSettings = action.payload.data;
       })
       .addCase(updateSystemSettings.fulfilled, (state, action) => {
-        state.systemSettings = action.payload.data.settings;
+        state.systemSettings = action.payload.data;
       })
 
       // Analytics Data
@@ -680,7 +744,7 @@ const adminSlice = createSlice({
       })
       .addCase(fetchAnalyticsData.fulfilled, (state, action) => {
         state.analyticsLoading = false;
-        state.analyticsData = action.payload.data.analytics;
+        state.analyticsData = action.payload.data;
         state.error = null;
       })
       .addCase(fetchAnalyticsData.rejected, (state, action) => {

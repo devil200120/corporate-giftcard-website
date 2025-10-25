@@ -155,6 +155,48 @@ export const updateProductStock = createAsyncThunk(
   }
 );
 
+export const addProduct = createAsyncThunk(
+  'products/addProduct',
+  async (productData, { rejectWithValue }) => {
+    try {
+      const response = await productAPI.addProduct(productData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to add product'
+      );
+    }
+  }
+);
+
+export const updateProduct = createAsyncThunk(
+  'products/updateProduct',
+  async ({ productId, productData }, { rejectWithValue }) => {
+    try {
+      const response = await productAPI.updateProduct(productId, productData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to update product'
+      );
+    }
+  }
+);
+
+export const deleteProduct = createAsyncThunk(
+  'products/deleteProduct',
+  async (productId, { rejectWithValue }) => {
+    try {
+      const response = await productAPI.deleteProduct(productId);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to delete product'
+      );
+    }
+  }
+);
+
 // Product slice
 const productSlice = createSlice({
   name: 'products',
@@ -205,14 +247,14 @@ const productSlice = createSlice({
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.products = action.payload.data.products;
+        state.products = action.payload.data;
         state.pagination = {
-          currentPage: action.payload.data.currentPage,
-          totalPages: action.payload.data.totalPages,
-          totalProducts: action.payload.data.totalProducts,
-          limit: action.payload.data.limit,
-          hasNextPage: action.payload.data.hasNextPage,
-          hasPrevPage: action.payload.data.hasPrevPage,
+          currentPage: action.payload.pagination.page,
+          totalPages: action.payload.pagination.totalPages,
+          totalProducts: action.payload.pagination.total,
+          limit: action.payload.pagination.limit,
+          hasNextPage: action.payload.pagination.hasNextPage,
+          hasPrevPage: action.payload.pagination.hasPrevPage,
         };
         state.error = null;
       })
@@ -228,7 +270,7 @@ const productSlice = createSlice({
       })
       .addCase(fetchProductById.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.currentProduct = action.payload.data.product;
+        state.currentProduct = action.payload.data;
         state.error = null;
       })
       .addCase(fetchProductById.rejected, (state, action) => {
@@ -244,7 +286,7 @@ const productSlice = createSlice({
       })
       .addCase(searchProducts.fulfilled, (state, action) => {
         state.searchLoading = false;
-        state.searchResults = action.payload.data.products;
+        state.searchResults = action.payload.data;
         state.error = null;
       })
       .addCase(searchProducts.rejected, (state, action) => {
@@ -259,7 +301,7 @@ const productSlice = createSlice({
       })
       .addCase(fetchFeaturedProducts.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.featuredProducts = action.payload.data.products;
+        state.featuredProducts = action.payload.data;
         state.error = null;
       })
       .addCase(fetchFeaturedProducts.rejected, (state, action) => {
@@ -274,14 +316,14 @@ const productSlice = createSlice({
       })
       .addCase(fetchProductsByCategory.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.products = action.payload.data.products;
+        state.products = action.payload.data;
         state.pagination = {
-          currentPage: action.payload.data.currentPage,
-          totalPages: action.payload.data.totalPages,
-          totalProducts: action.payload.data.totalProducts,
-          limit: action.payload.data.limit,
-          hasNextPage: action.payload.data.hasNextPage,
-          hasPrevPage: action.payload.data.hasPrevPage,
+          currentPage: action.payload.pagination.page,
+          totalPages: action.payload.pagination.totalPages,
+          totalProducts: action.payload.pagination.total,
+          limit: action.payload.pagination.limit,
+          hasNextPage: action.payload.pagination.hasNextPage,
+          hasPrevPage: action.payload.pagination.hasPrevPage,
         };
         state.error = null;
       })
@@ -335,6 +377,62 @@ const productSlice = createSlice({
         if (state.currentProduct && state.currentProduct._id === productId) {
           state.currentProduct.stock = stock;
         }
+      })
+
+      // Add Product
+      .addCase(addProduct.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(addProduct.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.products.unshift(action.payload.data.product);
+        state.error = null;
+      })
+      .addCase(addProduct.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+
+      // Update Product
+      .addCase(updateProduct.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateProduct.fulfilled, (state, action) => {
+        state.isLoading = false;
+        const updatedProduct = action.payload.data.product;
+        const productIndex = state.products.findIndex(p => p._id === updatedProduct._id);
+        if (productIndex !== -1) {
+          state.products[productIndex] = updatedProduct;
+        }
+        if (state.currentProduct && state.currentProduct._id === updatedProduct._id) {
+          state.currentProduct = updatedProduct;
+        }
+        state.error = null;
+      })
+      .addCase(updateProduct.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+
+      // Delete Product
+      .addCase(deleteProduct.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(deleteProduct.fulfilled, (state, action) => {
+        state.isLoading = false;
+        const productId = action.payload.data.productId;
+        state.products = state.products.filter(p => p._id !== productId);
+        if (state.currentProduct && state.currentProduct._id === productId) {
+          state.currentProduct = null;
+        }
+        state.error = null;
+      })
+      .addCase(deleteProduct.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
       });
   },
 });

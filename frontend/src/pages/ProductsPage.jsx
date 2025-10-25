@@ -18,6 +18,7 @@ import ProductCard from "../components/product/ProductCard";
 import ProductFilters from "../components/product/ProductFilters";
 import ProductSort from "../components/product/ProductSort";
 import Pagination from "../components/common/Pagination";
+import { transformProducts } from "../utils/productTransform";
 
 const ProductsPage = () => {
   const dispatch = useDispatch();
@@ -26,14 +27,21 @@ const ProductsPage = () => {
   const [showFilters, setShowFilters] = useState(false);
 
   const {
-    products,
-    totalProducts,
-    currentPage,
-    totalPages,
+    products: rawProducts,
+    pagination,
     isLoading,
     filters,
     sortBy,
   } = useSelector((state) => state.products);
+
+  const { totalProducts, currentPage, totalPages } = pagination;
+
+  // Transform products for display
+  const products = transformProducts(rawProducts || []);
+
+  // Debug logging
+  console.log("Raw products:", rawProducts);
+  console.log("Transformed products:", products);
 
   const { categories } = useSelector((state) => state.categories);
 
@@ -111,7 +119,7 @@ const ProductsPage = () => {
       return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard key={product._id} product={product} />
           ))}
         </div>
       );
@@ -120,7 +128,7 @@ const ProductsPage = () => {
         <div className="space-y-5">
           {products.map((product) => (
             <div
-              key={product.id}
+              key={product._id}
               className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow"
             >
               <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6">

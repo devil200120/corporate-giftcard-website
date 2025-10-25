@@ -8,7 +8,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// Upload image to cloudinary
+// Upload image to cloudinary from file path
 const uploadToCloudinary = async (filePath, options = {}) => {
   try {
     const defaultOptions = {
@@ -41,6 +41,44 @@ const uploadToCloudinary = async (filePath, options = {}) => {
       fs.unlinkSync(filePath);
     }
     
+    console.error('Cloudinary upload error:', error);
+    throw new Error('Failed to upload image to cloud storage');
+  }
+};
+
+// Upload image to cloudinary from buffer (for memory uploads)
+const uploadBufferToCloudinary = async (buffer, options = {}) => {
+  try {
+    const defaultOptions = {
+      resource_type: 'auto',
+      quality: 'auto',
+      fetch_format: 'auto',
+      folder: 'corporate-gifting',
+      ...options
+    };
+
+    return new Promise((resolve, reject) => {
+      cloudinary.uploader.upload_stream(
+        defaultOptions,
+        (error, result) => {
+          if (error) {
+            console.error('Cloudinary upload error:', error);
+            reject(new Error('Failed to upload image to cloud storage'));
+          } else {
+            resolve({
+              public_id: result.public_id,
+              secure_url: result.secure_url,
+              url: result.url,
+              width: result.width,
+              height: result.height,
+              format: result.format,
+              bytes: result.bytes
+            });
+          }
+        }
+      ).end(buffer);
+    });
+  } catch (error) {
     console.error('Cloudinary upload error:', error);
     throw new Error('Failed to upload image to cloud storage');
   }
@@ -239,6 +277,7 @@ const getFolderContents = async (folderPath, options = {}) => {
 
 module.exports = {
   uploadToCloudinary,
+  uploadBufferToCloudinary,
   uploadMultipleToCloudinary,
   deleteFromCloudinary,
   deleteMultipleFromCloudinary,

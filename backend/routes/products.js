@@ -48,11 +48,12 @@ const productValidation = [
   body('category')
     .isMongoId()
     .withMessage('Valid category ID is required'),
-  body('price.regular')
+  // Handle both nested object and FormData bracket notation
+  body(['price.regular', 'price[regular]'])
     .isNumeric()
     .isFloat({ min: 0 })
     .withMessage('Regular price must be a positive number'),
-  body('inventory.stockQuantity')
+  body(['inventory.stockQuantity', 'inventory[stockQuantity]'])
     .isNumeric()
     .isInt({ min: 0 })
     .withMessage('Stock quantity must be a non-negative integer')
@@ -90,8 +91,8 @@ router.put('/reviews/:reviewId', protect, reviewValidation, updateProductReview)
 router.delete('/reviews/:reviewId', protect, deleteProductReview);
 
 // Admin routes
-router.post('/', protect, admin, uploadMiddleware.productImages, productValidation, createProduct);
-router.put('/:id', protect, admin, uploadMiddleware.productImages, productValidation, updateProduct);
+router.post('/', protect, admin, uploadMiddleware.productImages, createProduct);
+router.put('/:id', protect, admin, uploadMiddleware.productImages, updateProduct);
 router.delete('/:id', protect, admin, deleteProduct);
 router.post('/:id/images', protect, admin, uploadMiddleware.productImages, uploadProductImages);
 router.delete('/:id/images/:imageId', protect, admin, deleteProductImage);

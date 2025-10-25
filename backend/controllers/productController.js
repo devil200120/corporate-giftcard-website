@@ -2,7 +2,7 @@ const Product = require('../models/Product');
 const Category = require('../models/Category');
 const User = require('../models/User');
 const { validationResult } = require('express-validator');
-const { uploadToCloudinary, deleteFromCloudinary } = require('../utils/cloudinary');
+const { uploadToCloudinary, uploadBufferToCloudinary, deleteFromCloudinary } = require('../utils/cloudinary');
 const { createError } = require('../utils/errorHandler');
 const mongoose = require('mongoose');
 
@@ -146,7 +146,7 @@ const getProduct = async (req, res, next) => {
     }
 
     // Increment view count
-    product.analytics.views += 1;
+    product.viewCount += 1;
     await product.save();
 
     res.status(200).json({
@@ -173,7 +173,7 @@ const createProduct = async (req, res, next) => {
     // Handle file uploads
     if (req.files && req.files.length > 0) {
       const imageUploadPromises = req.files.map(file =>
-        uploadToCloudinary(file.buffer, 'products')
+        uploadBufferToCloudinary(file.buffer, { folder: 'products' })
       );
 
       const uploadResults = await Promise.all(imageUploadPromises);
@@ -182,7 +182,7 @@ const createProduct = async (req, res, next) => {
         url: result.secure_url,
         public_id: result.public_id,
         alt: req.body.imageAlts?.[index] || productData.name,
-        isPrimary: index === 0
+        isMain: index === 0
       }));
     }
 
@@ -230,7 +230,7 @@ const updateProduct = async (req, res, next) => {
     // Handle new file uploads
     if (req.files && req.files.length > 0) {
       const imageUploadPromises = req.files.map(file =>
-        uploadToCloudinary(file.buffer, 'products')
+        uploadBufferToCloudinary(file.buffer, { folder: 'products' })
       );
 
       const uploadResults = await Promise.all(imageUploadPromises);
@@ -239,7 +239,7 @@ const updateProduct = async (req, res, next) => {
         url: result.secure_url,
         public_id: result.public_id,
         alt: req.body.imageAlts?.[index] || updateData.name || product.name,
-        isPrimary: false
+        isMain: false
       }));
 
       // Append to existing images
